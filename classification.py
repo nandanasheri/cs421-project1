@@ -62,9 +62,18 @@ def load_as_list(fname):
 # This function prepares the text by removing stopwords and converting all text to lowercase.
 # This standardizes the raw data, focusing on the meaningful content essential for effective analysis.
 def clean_text(text):
+    cleaned_text = text.lower()
+    
     # Convert text to lowercase
     # Filter out stopwords using NLTK's English stopwords list
-    return None
+    stop_words = set(nltk.corpus.stopwords.words('english'))
+
+    tokens = []
+    for eachtoken in get_tokens(cleaned_text):
+        if eachtoken not in stop_words:
+            tokens.append(eachtoken)
+    
+    return tokens
 
 # Function: get_sentences(text)
 # text: A string containing the text to be processed
@@ -74,7 +83,7 @@ def clean_text(text):
 # This is useful for tasks that require analysis at the sentence level.
 def get_sentences(text):
     # Use NLTK's sent_tokenize to split text into sentences
-    return None
+    return nltk.tokenize.sent_tokenize(text, 'english')
 
 
 # Function to convert a given string into a list of tokens
@@ -84,7 +93,7 @@ def get_sentences(text):
 def get_tokens(inp_str):
     # Check for existence of tokenizer, download if not found
     # Tokenize input string and return list of tokens
-    return None
+    return nltk.tokenize.word_tokenize(inp_str)
 
 # Function: vectorize_train.  See project statement for more details.
 # training_documents: A list of strings
@@ -204,88 +213,91 @@ def evaluate_performance(test_labels, preds):
 # Some of the provided  code will help you in answering
 # project questions, but it won't work correctly until all functions have been implemented.
 if __name__ == "__main__":
-    print("*************** Loading data & processing *****************")
-    # Load the dataset
-    print("Loading dataset.csv....")
-    documents, labels, train_ids = load_as_list("dataset.csv")
+    sentences = 'Hi, my name is jdfhkdsl. i like going to uic. $3.8 not really, but i enjoy it sometime! nice to mee tyou'
+    print(clean_text(sentences))
+    # print("*************** Loading data & processing *****************")
+    # # Load the dataset
+    # print("Loading dataset.csv....")
+    # documents, labels, train_ids = load_as_list("dataset.csv")
     
 
-    # Load the Word2Vec representations so that you can make use of it later
-    print("Loading Word2Vec representations....")
-    word2vec = load_w2v(EMBEDDING_FILE)
+    # # Load the Word2Vec representations so that you can make use of it later
+    # print("Loading Word2Vec representations....")
+    # word2vec = load_w2v(EMBEDDING_FILE)
 
-    # Compute TFIDF representations so that you can make use of them later
-    print("Computing TFIDF representations....")
-    vectorizer, tfidf_train = vectorize_train(documents)
-
-
-    print("\n**************** Training models ***********************")
-    # Instantiate and train the machine learning models
-    print("Instantiating models....")
-    nb_tfidf, logistic_tfidf = instantiate_models()
-    nb_w2v, logistic_w2v = instantiate_models()
-
-    print("Training Naive Bayes models....")
-    start = time.time() # This will help you monitor training times (useful once training functions are implemented!)
-    nb_tfidf = train_model_tfidf(nb_tfidf, tfidf_train, labels)
-    end = time.time()
-    print("Naive Bayes + TFIDF trained in {0} seconds".format(end - start))
-
-    start = time.time()
-    nb_w2v = train_model_w2v(nb_w2v, word2vec, documents, labels)
-    end = time.time()
-    print("Naive Bayes + w2v trained in {0} seconds".format(end - start))
-
-    print("Training Logistic Regression models....")
-    start = time.time()
-    logistic_tfidf = train_model_tfidf(logistic_tfidf, tfidf_train, labels)
-    end = time.time()
-    print("Logistic Regression + TFIDF trained in {0} seconds".format(end - start))
-
-    start = time.time()
-    logistic_w2v = train_model_w2v(logistic_w2v, word2vec, documents, labels)
-    end = time.time()
-    print("Logistic Regression + w2v trained in {0} seconds".format(end - start))
+    # # Compute TFIDF representations so that you can make use of them later
+    # print("Computing TFIDF representations....")
+    # vectorizer, tfidf_train = vectorize_train(documents)
 
 
-    print("\n***************** Testing models ***************************")
-    test_documents, test_labels, test_ids = load_as_list("test_data.csv")
+    # print("\n**************** Training models ***********************")
+    # # Instantiate and train the machine learning models
+    # print("Instantiating models....")
+    # nb_tfidf, logistic_tfidf = instantiate_models()
+    # nb_w2v, logistic_w2v = instantiate_models()
 
-    models_tfidf = [nb_tfidf, logistic_tfidf]
-    models_w2v = [nb_w2v, logistic_w2v]
-    model_names = ["Naive Bayes", "Logistic Regression"]
+    # print("Training Naive Bayes models....")
+    # start = time.time() # This will help you monitor training times (useful once training functions are implemented!)
+    # nb_tfidf = train_model_tfidf(nb_tfidf, tfidf_train, labels)
+    # end = time.time()
+    # print("Naive Bayes + TFIDF trained in {0} seconds".format(end - start))
 
-    outfile = open("classification_report.csv", "w", newline='\n')
-    outfile_writer = csv.writer(outfile)
-    outfile_writer.writerow(["Name", "Precision", "Recall", "F1", "Accuracy"])
+    # start = time.time()
+    # nb_w2v = train_model_w2v(nb_w2v, word2vec, documents, labels)
+    # end = time.time()
+    # print("Naive Bayes + w2v trained in {0} seconds".format(end - start))
 
-    for i, model in enumerate(models_tfidf):
-        # Testing TFIDF model
-        print(f"Testing {model_names[i]} + TFIDF....")
-        tfidf_preds = test_model_tfidf(model, vectorizer, test_documents)
-        # Save predictions with IDs
-        with open(f"{model_names[i]}_TFIDF_predictions.csv", "w", newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(['ID', 'Predicted Label'])
-            for id, pred in zip(test_ids, tfidf_preds):
-                writer.writerow([id, pred])
+    # print("Training Logistic Regression models....")
+    # start = time.time()
+    # logistic_tfidf = train_model_tfidf(logistic_tfidf, tfidf_train, labels)
+    # end = time.time()
+    # print("Logistic Regression + TFIDF trained in {0} seconds".format(end - start))
 
-        # Evaluate predictions
-        p, r, f, a = evaluate_performance(test_labels, tfidf_preds)
-        outfile_writer.writerow([model_names[i] + " + TFIDF", p, r, f, a])
+    # start = time.time()
+    # logistic_w2v = train_model_w2v(logistic_w2v, word2vec, documents, labels)
+    # end = time.time()
+    # print("Logistic Regression + w2v trained in {0} seconds".format(end - start))
 
-        # Testing Word2Vec model
-        print(f"Testing {model_names[i]} + w2v....")
-        w2v_preds = test_model_w2v(models_w2v[i], word2vec, test_documents)
-        # Save predictions with IDs
-        with open(f"{model_names[i]}_w2v_predictions.csv", "w", newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(['ID', 'Predicted Label'])
-            for id, pred in zip(test_ids, w2v_preds):
-                writer.writerow([id, pred])
 
-        # Evaluate predictions
-        p, r, f, a = evaluate_performance(test_labels, w2v_preds)
-        outfile_writer.writerow([model_names[i] + " + w2v", p, r, f, a])
+    # print("\n***************** Testing models ***************************")
+    # test_documents, test_labels, test_ids = load_as_list("test_data.csv")
 
-    outfile.close()
+    # models_tfidf = [nb_tfidf, logistic_tfidf]
+    # models_w2v = [nb_w2v, logistic_w2v]
+    # model_names = ["Naive Bayes", "Logistic Regression"]
+
+    # outfile = open("classification_report.csv", "w", newline='\n')
+    # outfile_writer = csv.writer(outfile)
+    # outfile_writer.writerow(["Name", "Precision", "Recall", "F1", "Accuracy"])
+
+    # for i, model in enumerate(models_tfidf):
+    #     # Testing TFIDF model
+    #     print(f"Testing {model_names[i]} + TFIDF....")
+    #     tfidf_preds = test_model_tfidf(model, vectorizer, test_documents)
+    #     # Save predictions with IDs
+    #     with open(f"{model_names[i]}_TFIDF_predictions.csv", "w", newline='') as f:
+    #         writer = csv.writer(f)
+    #         writer.writerow(['ID', 'Predicted Label'])
+    #         for id, pred in zip(test_ids, tfidf_preds):
+    #             writer.writerow([id, pred])
+
+    #     # Evaluate predictions
+    #     p, r, f, a = evaluate_performance(test_labels, tfidf_preds)
+    #     outfile_writer.writerow([model_names[i] + " + TFIDF", p, r, f, a])
+
+    #     # Testing Word2Vec model
+    #     print(f"Testing {model_names[i]} + w2v....")
+    #     w2v_preds = test_model_w2v(models_w2v[i], word2vec, test_documents)
+    #     # Save predictions with IDs
+    #     with open(f"{model_names[i]}_w2v_predictions.csv", "w", newline='') as f:
+    #         writer = csv.writer(f)
+    #         writer.writerow(['ID', 'Predicted Label'])
+    #         for id, pred in zip(test_ids, w2v_preds):
+    #             writer.writerow([id, pred])
+
+    #     # Evaluate predictions
+    #     p, r, f, a = evaluate_performance(test_labels, w2v_preds)
+    #     outfile_writer.writerow([model_names[i] + " + w2v", p, r, f, a])
+
+    # outfile.close()
+    
