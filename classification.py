@@ -31,6 +31,8 @@ from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_sc
 # If you store the file elsewhere, you will need to update the file path accordingly.
 EMBEDDING_FILE = "w2v.pkl"
 
+nltk.download('stopwords')
+
 # Function: load_w2v
 # filepath: path of w2v.pkl
 # Returns: A dictionary containing words as keys and pre-trained word2vec representations as numpy arrays of shape (300,)
@@ -73,7 +75,7 @@ def clean_text(text):
         if eachtoken not in stop_words:
             tokens.append(eachtoken)
     
-    return tokens
+    return " ".join(tokens)
 
 # Function: get_sentences(text)
 # text: A string containing the text to be processed
