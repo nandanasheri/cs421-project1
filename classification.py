@@ -169,7 +169,10 @@ def instantiate_models():
 # embeddings for the training documents.
 def train_model_tfidf(model, tfidf_train, training_labels):
     # Fit model to training data using TFIDF matrix
-    return None
+    # Convert the features to a dense array
+    dense_array_features = tfidf_train.toarray()
+    model.fit(dense_array_features, training_labels)
+    return model
 
 # Function: train_model_w2v(model, word2vec, training_documents, training_labels)
 # model: An instantiated machine learning model
@@ -182,8 +185,13 @@ def train_model_tfidf(model, tfidf_train, training_labels):
 # embeddings for the training documents.
 def train_model_w2v(model, word2vec, training_documents, training_labels):
     # Convert training documents to Word2Vec embeddings
+    embeddings_list = []
+    for document in training_documents:
+        embeddings_list.append(string2vec(word2vec, document))
+
     # Fit model to these embeddings
-    return None
+    model.fit(embeddings_list, training_labels)
+    return model
 
 # Function: test_model_tfidf(model, vectorizer, test_documents, test_labels)
 # model: An instantiated machine learning model
@@ -236,42 +244,42 @@ if __name__ == "__main__":
     documents, labels, train_ids = load_as_list("dataset.csv")
     
 
-    # # Load the Word2Vec representations so that you can make use of it later
-    # print("Loading Word2Vec representations....")
-    # word2vec = load_w2v(EMBEDDING_FILE)
+    # Load the Word2Vec representations so that you can make use of it later
+    print("Loading Word2Vec representations....")
+    word2vec = load_w2v(EMBEDDING_FILE)
 
     # Compute TFIDF representations so that you can make use of them later
     print("Computing TFIDF representations....")
     vectorizer, tfidf_train = vectorize_train(documents)
 
 
-    # print("\n**************** Training models ***********************")
-    # # Instantiate and train the machine learning models
-    # print("Instantiating models....")
-    # nb_tfidf, logistic_tfidf = instantiate_models()
-    # nb_w2v, logistic_w2v = instantiate_models()
+    print("\n**************** Training models ***********************")
+    # Instantiate and train the machine learning models
+    print("Instantiating models....")
+    nb_tfidf, logistic_tfidf = instantiate_models()
+    nb_w2v, logistic_w2v = instantiate_models()
 
-    # print("Training Naive Bayes models....")
-    # start = time.time() # This will help you monitor training times (useful once training functions are implemented!)
-    # nb_tfidf = train_model_tfidf(nb_tfidf, tfidf_train, labels)
-    # end = time.time()
-    # print("Naive Bayes + TFIDF trained in {0} seconds".format(end - start))
+    print("Training Naive Bayes models....")
+    start = time.time() # This will help you monitor training times (useful once training functions are implemented!)
+    nb_tfidf = train_model_tfidf(nb_tfidf, tfidf_train, labels)
+    end = time.time()
+    print("Naive Bayes + TFIDF trained in {0} seconds".format(end - start))
 
-    # start = time.time()
-    # nb_w2v = train_model_w2v(nb_w2v, word2vec, documents, labels)
-    # end = time.time()
-    # print("Naive Bayes + w2v trained in {0} seconds".format(end - start))
+    start = time.time()
+    nb_w2v = train_model_w2v(nb_w2v, word2vec, documents, labels)
+    end = time.time()
+    print("Naive Bayes + w2v trained in {0} seconds".format(end - start))
 
-    # print("Training Logistic Regression models....")
-    # start = time.time()
-    # logistic_tfidf = train_model_tfidf(logistic_tfidf, tfidf_train, labels)
-    # end = time.time()
-    # print("Logistic Regression + TFIDF trained in {0} seconds".format(end - start))
+    print("Training Logistic Regression models....")
+    start = time.time()
+    logistic_tfidf = train_model_tfidf(logistic_tfidf, tfidf_train, labels)
+    end = time.time()
+    print("Logistic Regression + TFIDF trained in {0} seconds".format(end - start))
 
-    # start = time.time()
-    # logistic_w2v = train_model_w2v(logistic_w2v, word2vec, documents, labels)
-    # end = time.time()
-    # print("Logistic Regression + w2v trained in {0} seconds".format(end - start))
+    start = time.time()
+    logistic_w2v = train_model_w2v(logistic_w2v, word2vec, documents, labels)
+    end = time.time()
+    print("Logistic Regression + w2v trained in {0} seconds".format(end - start))
 
 
     # print("\n***************** Testing models ***************************")
