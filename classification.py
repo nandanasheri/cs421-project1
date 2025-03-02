@@ -49,10 +49,11 @@ def load_w2v(filepath):
 # and returns a list of documents (movie summaries) and a list of categorical values (label).
 def load_as_list(fname):
     # Initialize variables for document and label lists
-    movie_summaries = None
-    labels = None
-    ids = None
-
+    
+    data = pd.read_csv(fname)
+    movie_summaries = data['summary'].to_list()
+    labels = data['genre'].to_list()
+    ids = data['id'].to_list()
     # Read CSV file and extract 'summary' and 'genre' columns into lists
     # Return the lists
     return movie_summaries, labels, ids
@@ -102,8 +103,11 @@ def get_tokens(inp_str):
 # Returns: An initialized TfidfVectorizer model, and a document-term matrix, dtype: scipy.sparse.csr.csr_matrix
 def vectorize_train(training_documents):
     # Initialize TfidfVectorizer with a tokenizer
+    vectorizer = TfidfVectorizer(tokenizer=get_tokens, token_pattern=None)
     # Fit model to training documents and create document-term matrix
-    return None, None
+    matrix = vectorizer.fit_transform(training_documents)
+    return vectorizer, matrix
+
 
 # Function: w2v(word2vec, token)
 # word2vec: The pretrained Word2Vec representations as dictionary
@@ -215,21 +219,19 @@ def evaluate_performance(test_labels, preds):
 # Some of the provided  code will help you in answering
 # project questions, but it won't work correctly until all functions have been implemented.
 if __name__ == "__main__":
-    sentences = 'Hi, my name is jdfhkdsl. i like going to uic. $3.8 not really, but i enjoy it sometime! nice to mee tyou'
-    print(clean_text(sentences))
-    # print("*************** Loading data & processing *****************")
-    # # Load the dataset
-    # print("Loading dataset.csv....")
-    # documents, labels, train_ids = load_as_list("dataset.csv")
+    print("*************** Loading data & processing *****************")
+    # Load the dataset
+    print("Loading dataset.csv....")
+    documents, labels, train_ids = load_as_list("dataset.csv")
     
 
     # # Load the Word2Vec representations so that you can make use of it later
     # print("Loading Word2Vec representations....")
     # word2vec = load_w2v(EMBEDDING_FILE)
 
-    # # Compute TFIDF representations so that you can make use of them later
-    # print("Computing TFIDF representations....")
-    # vectorizer, tfidf_train = vectorize_train(documents)
+    # Compute TFIDF representations so that you can make use of them later
+    print("Computing TFIDF representations....")
+    vectorizer, tfidf_train = vectorize_train(documents)
 
 
     # print("\n**************** Training models ***********************")
