@@ -31,7 +31,7 @@ from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_sc
 # If you store the file elsewhere, you will need to update the file path accordingly.
 EMBEDDING_FILE = "w2v.pkl"
 
-nltk.download('stopwords')
+# nltk.download('stopwords')
 
 # Function: load_w2v
 # filepath: path of w2v.pkl
@@ -119,9 +119,13 @@ def vectorize_train(training_documents):
 # pretrained model, it should return a zero vector; otherwise, it returns the
 # corresponding word vector from the word2vec dictionary.
 def w2v(word2vec, token):
+    
     # Initialize a zero vector
+    result_vector = np.zeros((300,), dtype=int)
     # Check if token exists in word2vec dictionary and get corresponding vector
-    return None
+    if token in word2vec:
+        result_vector = word2vec[token]
+    return result_vector
 
 # Function: string2vec(word2vec, user_input)
 # word2vec: The pretrained Word2Vec model
@@ -133,9 +137,14 @@ def w2v(word2vec, token):
 # single, averaged embedding for the entire input.
 def string2vec(word2vec, user_input):
     # Tokenize input string
+    tokens = get_tokens(user_input)
+    all_vec = []
     # Accumulate word vectors for each token
+    for each_token in tokens:
+        all_vec.append(w2v(word2vec, each_token))
+        
     # Average the accumulated vectors
-    return None
+    return np.mean(all_vec, axis=0)
 
 # Function: instantiate_models()
 # This function does not take any input
