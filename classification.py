@@ -31,7 +31,7 @@ from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_sc
 # If you store the file elsewhere, you will need to update the file path accordingly.
 EMBEDDING_FILE = "w2v.pkl"
 
-# nltk.download('stopwords')
+nltk.download('stopwords')
 
 # Function: load_w2v
 # filepath: path of w2v.pkl
@@ -142,7 +142,7 @@ def string2vec(word2vec, user_input):
     # Accumulate word vectors for each token
     for each_token in tokens:
         all_vec.append(w2v(word2vec, each_token))
-        
+
     # Average the accumulated vectors
     return np.mean(all_vec, axis=0)
 
@@ -155,7 +155,9 @@ def string2vec(word2vec, user_input):
 # in this function.
 def instantiate_models():
     # Instantiate and return machine learning models
-    return None, None
+    gaussianNBModel = GaussianNB()
+    regressionModel = LogisticRegression(random_state=18, solver='lbfgs')
+    return gaussianNBModel, regressionModel
 
 # Function: train_model_tfidf(model, tfidf_train, training_labels)
 # model: An instantiated machine learning model
