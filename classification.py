@@ -106,6 +106,7 @@ def vectorize_train(training_documents):
     vectorizer = TfidfVectorizer(tokenizer=get_tokens, token_pattern=None)
     # Fit model to training documents and create document-term matrix
     matrix = vectorizer.fit_transform(training_documents)
+    
     return vectorizer, matrix
 
 
@@ -171,6 +172,7 @@ def train_model_tfidf(model, tfidf_train, training_labels):
     # Fit model to training data using TFIDF matrix
     # Convert the features to a dense array
     dense_array_features = tfidf_train.toarray()
+    
     model.fit(dense_array_features, training_labels)
     return model
 
@@ -188,9 +190,10 @@ def train_model_w2v(model, word2vec, training_documents, training_labels):
     embeddings_list = []
     for document in training_documents:
         embeddings_list.append(string2vec(word2vec, document))
+    embeddings_np_arr = np.array(embeddings_list)
 
     # Fit model to these embeddings
-    model.fit(embeddings_list, training_labels)
+    model.fit(embeddings_np_arr, training_labels)
     return model
 
 # Function: test_model_tfidf(model, vectorizer, test_documents, test_labels)
@@ -204,7 +207,9 @@ def train_model_w2v(model, word2vec, training_documents, training_labels):
 # that document.  
 def test_model_tfidf(model, vectorizer, test_documents):
     # Predict using the TFIDF model
-    preds = []
+    test_doc = vectorizer.transform(test_documents)
+    dense_arr = test_doc.toarray()
+    preds = model.predict(dense_arr)
     return preds
 
 
@@ -218,8 +223,14 @@ def test_model_tfidf(model, vectorizer, test_documents):
 # for each preprocessed test document and then predicting an output label for
 # that document.  
 def test_model_w2v(model, word2vec, test_documents):
-    # Predict using the Word2Vec model
-    preds = []
+    test_embeddings = []
+    for document in test_documents:
+        test_embeddings.append(string2vec(word2vec, document))
+
+    embeddings_np_arr = np.array(test_embeddings)
+
+    # Predict
+    preds = model.predict(embeddings_np_arr)
     return preds
 
 
@@ -228,10 +239,10 @@ def test_model_w2v(model, word2vec, test_documents):
 # preds: A list of predicted labels produced by the model
 # Returns: Returns precision, recall, F1 score, and accuracy metrics
 def evaluate_performance(test_labels, preds):
-    precision = None
-    recall = None
-    f1 = None
-    accuracy = None
+    precision = precision_score(test_labels, preds, average='weighted')
+    recall = recall_score(test_labels, preds, average='weighted')
+    f1 = f1_score(test_labels, preds, average='weighted')
+    accuracy = accuracy_score(test_labels, preds)
     return precision, recall, f1, accuracy
 
 # Use this main function to test your code. Sample code is provided to assist with the assignment;
@@ -282,45 +293,45 @@ if __name__ == "__main__":
     print("Logistic Regression + w2v trained in {0} seconds".format(end - start))
 
 
-    # print("\n***************** Testing models ***************************")
-    # test_documents, test_labels, test_ids = load_as_list("test_data.csv")
+    print("\n***************** Testing models ***************************")
+    test_documents, test_labels, test_ids = load_as_list("test_data.csv")
 
-    # models_tfidf = [nb_tfidf, logistic_tfidf]
-    # models_w2v = [nb_w2v, logistic_w2v]
-    # model_names = ["Naive Bayes", "Logistic Regression"]
+    models_tfidf = [nb_tfidf, logistic_tfidf]
+    models_w2v = [nb_w2v, logistic_w2v]
+    model_names = ["Naive Bayes", "Logistic Regression"]
 
-    # outfile = open("classification_report.csv", "w", newline='\n')
-    # outfile_writer = csv.writer(outfile)
-    # outfile_writer.writerow(["Name", "Precision", "Recall", "F1", "Accuracy"])
+    outfile = open("classification_report.csv", "w", newline='\n')
+    outfile_writer = csv.writer(outfile)
+    outfile_writer.writerow(["Name", "Precision", "Recall", "F1", "Accuracy"])
 
-    # for i, model in enumerate(models_tfidf):
-    #     # Testing TFIDF model
-    #     print(f"Testing {model_names[i]} + TFIDF....")
-    #     tfidf_preds = test_model_tfidf(model, vectorizer, test_documents)
-    #     # Save predictions with IDs
-    #     with open(f"{model_names[i]}_TFIDF_predictions.csv", "w", newline='') as f:
-    #         writer = csv.writer(f)
-    #         writer.writerow(['ID', 'Predicted Label'])
-    #         for id, pred in zip(test_ids, tfidf_preds):
-    #             writer.writerow([id, pred])
+    for i, model in enumerate(models_tfidf):
+        # Testing TFIDF model
+        print(f"Testing {model_names[i]} + TFIDF....")
+        tfidf_preds = test_model_tfidf(model, vectorizer, test_documents)
+        # Save predictions with IDs
+        with open(f"{model_names[i]}_TFIDF_predictions.csv", "w", newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['ID', 'Predicted Label'])
+            for id, pred in zip(test_ids, tfidf_preds):
+                writer.writerow([id, pred])
 
-    #     # Evaluate predictions
-    #     p, r, f, a = evaluate_performance(test_labels, tfidf_preds)
-    #     outfile_writer.writerow([model_names[i] + " + TFIDF", p, r, f, a])
+        # Evaluate predictions
+        p, r, f, a = evaluate_performance(test_labels, tfidf_preds)
+        outfile_writer.writerow([model_names[i] + " + TFIDF", p, r, f, a])
 
-    #     # Testing Word2Vec model
-    #     print(f"Testing {model_names[i]} + w2v....")
-    #     w2v_preds = test_model_w2v(models_w2v[i], word2vec, test_documents)
-    #     # Save predictions with IDs
-    #     with open(f"{model_names[i]}_w2v_predictions.csv", "w", newline='') as f:
-    #         writer = csv.writer(f)
-    #         writer.writerow(['ID', 'Predicted Label'])
-    #         for id, pred in zip(test_ids, w2v_preds):
-    #             writer.writerow([id, pred])
+        # Testing Word2Vec model
+        print(f"Testing {model_names[i]} + w2v....")
+        w2v_preds = test_model_w2v(models_w2v[i], word2vec, test_documents)
+        # Save predictions with IDs
+        with open(f"{model_names[i]}_w2v_predictions.csv", "w", newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['ID', 'Predicted Label'])
+            for id, pred in zip(test_ids, w2v_preds):
+                writer.writerow([id, pred])
 
-    #     # Evaluate predictions
-    #     p, r, f, a = evaluate_performance(test_labels, w2v_preds)
-    #     outfile_writer.writerow([model_names[i] + " + w2v", p, r, f, a])
+        # Evaluate predictions
+        p, r, f, a = evaluate_performance(test_labels, w2v_preds)
+        outfile_writer.writerow([model_names[i] + " + w2v", p, r, f, a])
 
-    # outfile.close()
+    outfile.close()
     
